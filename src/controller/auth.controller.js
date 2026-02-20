@@ -18,7 +18,7 @@ export const register = async (req, resp) => {
             return resp.status(409).json({ message: "User already exists with this email address!" });
         }
 
-        const hashedPassword = bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         const user = new User({
             name,
@@ -50,7 +50,13 @@ export const login = async (req, resp) => {
 
         const user = await User.findOne({ username });
 
-        if (!user && !(await bcrypt.compare(password, user.password))) {
+        if (!user) {
+            return resp.status(404).json({ message: "Invalid credentials!" });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
             return resp.status(404).json({ message: "Invalid credentials!" });
         }
 
