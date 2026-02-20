@@ -37,7 +37,30 @@ export const register = async (req, resp) => {
     }
 };
 
-export const login = () => { };
+export const login = async (req, resp) => {
+    try {
+        const { username, password } = req.body;
+
+        const user = await User.findOne({ username });
+
+        if (!user) {
+            return resp.status(404).json({ message: "Invalid credentials!" });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+            return resp.status(404).json({ message: "Invalid credentials!" });
+        }
+
+        const token = generateToken(user._id, user.role);
+
+        return resp.status(200).json({ message: "User login successful", token })
+    } catch (error) {
+        console.log("Login failed : ", error);
+        return resp.status(500).json({ message: "Server error, Login failed!" });
+    }
+};
 
 const generateToken = (id, role) => {
     return jwt.sign({ id, role }, secret, { expiresIn: '30d' });
