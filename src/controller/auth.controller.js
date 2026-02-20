@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../model/user.model.js";
+import sendEmail from "../util/mail-send.util.js";
 
 dotenv.config();
 
@@ -27,6 +28,12 @@ export const register = async (req, resp) => {
         })
 
         await user.save();
+
+        await sendEmail(
+            user.username,
+            "Welcome to LMS",
+            `<h1>Welcome, ${user.name}🎉</h1><p>Your account is created successfully.</p>`
+        );
 
         const token = generateToken(user._id, user.role);
 
