@@ -28,6 +28,11 @@ export const registerRules = [
     body("role").isIn(["student", "instructor"]).withMessage("Invalid role"),
 ];
 
+export const loginRules = [
+    body("username").notEmpty().withMessage("Email address is required"),
+    body("password").notEmpty().withMessage("Password is required"),
+];
+
 export const courseRules = [
     body("title").notEmpty().withMessage("Course title is required"),
     body("description").notEmpty().withMessage("Description is required"),
