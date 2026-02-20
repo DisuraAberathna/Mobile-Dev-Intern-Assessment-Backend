@@ -5,6 +5,7 @@ const userSchema = mongoose.Schema({
         type: String,
         required: true,
         trim: true,
+        index: true,
     },
     username: {
         type: String,
@@ -20,7 +21,8 @@ const userSchema = mongoose.Schema({
         type: String,
         enum: ['student', 'instructor'],
         default: 'student',
-        required: true
+        required: true,
+        index: true,
     },
     enrolledCourses: [{
         type: mongoose.Schema.Types.ObjectId,
@@ -29,6 +31,8 @@ const userSchema = mongoose.Schema({
 }, {
     timestamps: true,
 });
+
+userSchema.index({ role: 1, createdAt: -1 });
 
 const User = mongoose.model("User", userSchema);
 
