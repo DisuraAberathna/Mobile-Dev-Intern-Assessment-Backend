@@ -3,11 +3,16 @@ import { body, validationResult } from "express-validator";
 export const validate = async (req, resp, next) => {
     const errors = validationResult(req);
 
-    if (errors.isEmpty) {
+    if (errors.isEmpty()) {
         return next();
     }
 
-    return resp.status(400).json({ errors: errors.array() });
+    return resp.status(400).json({
+        errors: errors.array().map(err => ({
+            field: err.path,
+            message: err.msg
+        }))
+    });
 };
 
 export const registerRules = [
