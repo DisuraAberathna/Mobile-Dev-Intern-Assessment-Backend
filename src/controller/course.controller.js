@@ -29,7 +29,7 @@ export const createCourse = async (req, resp) => {
         });
 
         if (existingCourse) {
-            return resp.status(409).json({ message:"You have already created a course with this title."});
+            return resp.status(409).json({ message: "You have already created a course with this title." });
         }
 
         const course = new Course({
@@ -48,4 +48,15 @@ export const createCourse = async (req, resp) => {
     }
 };
 
-export const getInstructorCourses = () => { };
+export const getInstructorCourses = async (req, resp) => {
+    try {
+        const courses = await Course.find({
+            instructor: req.user.id,
+        });
+
+        return resp.status(200).json({ courses });
+    } catch (error) {
+        console.log("Instructor courses loading failed : ", error);
+        return resp.status(500).json({ message: "Server error, Your courses loading failed!" });
+    }
+};
