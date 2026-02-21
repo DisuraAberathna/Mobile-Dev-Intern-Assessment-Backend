@@ -18,6 +18,34 @@ export const getCourseById = () => { };
 
 export const enrollInCourse = () => { };
 
-export const createCourse = () => { };
+export const createCourse = async (req, resp) => {
+    try {
+        const { title, description, content } = req.body;
+        const instructorId = req.user.id;
+
+        const existingCourse = await Course.findOne({
+            title: { $regex: new RegExp(`^${title}$`, "i") },
+            instructor: instructorId,
+        });
+
+        if (existingCourse) {
+            return resp.status(409).json({ message:"You have already created a course with this title."});
+        }
+
+        const course = new Course({
+            title,
+            description,
+            content,
+            instructor: instructorId,
+        });
+
+        await course.save();
+
+        return resp.status(201).json({ message: "Course creation successfull", course });
+    } catch (error) {
+        console.log("Create course failed : ", error);
+        return resp.status(500).json({ message: "Server error, Create course failed!" });
+    }
+};
 
 export const getInstructorCourses = () => { };
