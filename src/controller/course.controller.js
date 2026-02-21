@@ -29,17 +29,42 @@ export const getCourseById = async (req, resp) => {
     }
 };
 
-export const enrollInCourse = () => { };
+export const enrollInCourse = async (req, resp) => {
+    try {
+        const student = req.user.id;
+
+        const course = await Course.findById(req.params.id);
+
+        if (!course) {
+            return resp.status(404).json({ message: "Invalid course, can not find course with this id!" });
+        }
+
+        const isAlreadyEnrolled = course.enrolledStudents.some(
+            (item) => item.student.toString() === student
+        );
+
+        if (isAlreadyEnrolled) {
+            return resp.status(409).json({ message: "Student already enrolled in this course!" });
+        }
+
+        course.enrolledStudents.push({ student });
+        await course.save();
+
+        await User.findByIdAndUpdate(student, {
+            $push: { enrolledCourses: course._id }
+        });
+
+        return resp.status(200).json({ message: "Student successfully enroll with course!" });
+    } catch (error) {
+        console.log("Student enroll to course failed : ", error);
+        return resp.status(500).json({ message: "Server error, Student enroll to course failed!" });
+    }
+};
 
 export const createCourse = async (req, resp) => {
     try {
         const { title, description, content } = req.body;
-
-        const instructor = await User.findById(req.user.id);
-
-        if (!instructor) {
-            return resp.status(404).json({ message: "Invalid instructor, can not find any instructor with this id!" });
-        }
+        const instructor = req.user.id;
 
         const existingCourse = await Course.findOne({
             title: { $regex: new RegExp(`^${title}$`, "i") },
