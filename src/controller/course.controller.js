@@ -1,4 +1,5 @@
 import Course from "../model/course.model.js";
+import User from "../model/user.model.js";
 
 export const getAllCourses = async (req, resp) => {
     try {
@@ -21,11 +22,16 @@ export const enrollInCourse = () => { };
 export const createCourse = async (req, resp) => {
     try {
         const { title, description, content } = req.body;
-        const instructorId = req.user.id;
+
+        const instructor = await User.findById(req.user.id);
+
+        if (!instructor) {
+            return resp.status(404).json({ message: "Invalid instructor, can not find any instructor with this id!" });
+        }
 
         const existingCourse = await Course.findOne({
             title: { $regex: new RegExp(`^${title}$`, "i") },
-            instructor: instructorId,
+            instructor,
         });
 
         if (existingCourse) {
@@ -36,7 +42,7 @@ export const createCourse = async (req, resp) => {
             title,
             description,
             content,
-            instructor: instructorId,
+            instructor,
         });
 
         await course.save();
