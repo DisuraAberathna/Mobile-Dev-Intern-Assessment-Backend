@@ -5,17 +5,29 @@ export const getAllCourses = async (req, resp) => {
     try {
         const courses = await Course.find().populate("instructor", "name");
 
-        return resp.status(200).json({ courses });
+        return resp.status(200).json({ message: "All course data successfully retrieved!", courses });
     } catch (error) {
         console.log("Get all courses failed : ", error);
         return resp.status(500).json({ message: "Server error, Get all courses failed!" });
-
     }
 };
 
 export const getEnrolledCourses = () => { };
 
-export const getCourseById = () => { };
+export const getCourseById = async (req, resp) => {
+    try {
+        const course = await Course.findById(req.params.id).populate("instructor", "username");
+
+        if (!course) {
+            return resp.status(404).json({ message: "Invalid course, can not find course with this id!" });
+        }
+
+        return resp.status(200).json({ message: "Course data successfully retrieved!", course });
+    } catch (error) {
+        console.log("Get course by id failed : ", error);
+        return resp.status(500).json({ message: "Server error, Get course by id failed!" });
+    }
+};
 
 export const enrollInCourse = () => { };
 
@@ -60,7 +72,7 @@ export const getInstructorCourses = async (req, resp) => {
             instructor: req.user.id,
         });
 
-        return resp.status(200).json({ courses });
+        return resp.status(200).json({ message: "Instructor course data successfully retrieved!", courses });
     } catch (error) {
         console.log("Instructor courses loading failed : ", error);
         return resp.status(500).json({ message: "Server error, Your courses loading failed!" });
