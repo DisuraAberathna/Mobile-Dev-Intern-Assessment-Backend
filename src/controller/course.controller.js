@@ -12,7 +12,23 @@ export const getAllCourses = async (req, resp) => {
     }
 };
 
-export const getEnrolledCourses = () => { };
+export const getEnrolledCourses = async (req, resp) => {
+    try {
+        const user = await User.findById(req.user.id).populate({
+            path: "enrolledCourses",
+            populate: { path: "instructor", select: "name" }
+        });
+
+        if (!user) {
+            return resp.status(404).json({ message: "Invalid user, can not find user with this id!" });
+        }
+
+        return resp.status(200).json({ message: "User enrolled courses successfully retrieved!", enrolledCourses: user.enrolledCourses })
+    } catch (error) {
+        console.log("Get enrolled courses failed : ", error);
+        return resp.status(500).json({ message: "Server error, Get enrolled courses failed!" });
+    }
+};
 
 export const getCourseById = async (req, resp) => {
     try {
