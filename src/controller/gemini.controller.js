@@ -25,7 +25,7 @@ export const getRecommendations = async (req, resp) => {
 
 
         const result = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
+            model: "models/gemini-3-flash-preview",
             contents: `You are an academic advisor. Based on the list of courses below, recommend the most relevant ones to the student's goal. 
       Return only the IDs of the recommended courses in a valid JSON array format like: {"ids": ["id1", "id2"]}.
       
@@ -35,7 +35,7 @@ export const getRecommendations = async (req, resp) => {
       ${courseContext}`,
         });
 
-        const responseText = result.text();
+        const responseText = result.text;
         const recommendedData = JSON.parse(responseText.replace(/```json|```/g, ""),);
 
         const recommendations = await Course.find({ _id: { $in: recommendedData.ids }, }).populate("instructor", "username");
