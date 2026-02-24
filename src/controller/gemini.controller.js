@@ -11,17 +11,11 @@ export const getRecommendations = async (req, resp) => {
         const { prompt } = req.body;
 
         if (!prompt) {
-            return resp
-                .status(400)
-                .json({ message: "Please provide a career goal or interest." });
+            return resp.status(400).json({ message: "Please provide a career goal or interest." });
         }
 
         const availableCourses = await Course.find({}, "title description");
-        const courseContext = availableCourses
-            .map(
-                (c) => `ID: ${c._id}, Title: ${c.title}, Description: ${c.description}`,
-            )
-            .join("\n");
+        const courseContext = availableCourses.map((c) => `ID: ${c._id}, Title: ${c.title}, Description: ${c.description}`,).join("\n");
 
 
         const result = await ai.models.generateContent({
@@ -40,7 +34,7 @@ export const getRecommendations = async (req, resp) => {
 
         const recommendations = await Course.find({ _id: { $in: recommendedData.ids }, }).populate("instructor", "username");
 
-        return resp.status(200).json({ message: "Recommended courses successfully retrieved!", recommendations, });
+        return resp.status(200).json({ message: "Recommended courses successfully retrieved!", recommendations });
     } catch (error) {
         console.log("Get recommended courses failed : ", error);
         return resp
