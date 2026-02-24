@@ -37,7 +37,7 @@ export const register = async (req, resp) => {
 
         const token = generateToken(user._id, user.role);
 
-        return resp.status(201).json({ message: "User registration successful", token })
+        return resp.status(201).json({ message: "User registration successful", token, role: user.role })
     } catch (error) {
         console.log("Registration failed : ", error);
         return resp.status(500).json({ message: "Server error, Registraion failed!" });
@@ -62,7 +62,7 @@ export const login = async (req, resp) => {
 
         const token = generateToken(user._id, user.role);
 
-        return resp.status(200).json({ message: "User login successful", token })
+        return resp.status(200).json({ message: "User login successful", token, role: user.role })
     } catch (error) {
         console.log("Login failed : ", error);
         return resp.status(500).json({ message: "Server error, Login failed!" });
