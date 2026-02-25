@@ -7,6 +7,8 @@ import {
     getCourseById,
     getEnrolledCourses,
     getInstructorCourses,
+    updateCourse,
+    deleteCourse,
 } from "../controller/course.controller.js";
 import { courseRules, validate } from "../middleware/validator.middleware.js";
 
@@ -18,5 +20,7 @@ courseRoute.get("/:id", protect, getCourseById);
 courseRoute.post("/:id/enroll", protect, authorize("student"), enrollInCourse);
 courseRoute.post("/", protect, authorize("instructor"), courseRules, validate, createCourse);
 courseRoute.get("/instructor/my-courses", protect, authorize("instructor"), getInstructorCourses);
+courseRoute.put("/:id", protect, authorize("instructor"), courseRules, validate, updateCourse);
+courseRoute.delete("/:id", protect, authorize("instructor"), deleteCourse);
 
 export default courseRoute;

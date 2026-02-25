@@ -121,3 +121,56 @@ export const getInstructorCourses = async (req, resp) => {
         return resp.status(500).json({ message: "Server error, Your courses loading failed!" });
     }
 };
+
+export const updateCourse = async (req, resp) => {
+    try {
+        const { title, description, content } = req.body;
+        const instructor = req.user.id;
+        const courseId = req.params.id;
+
+        const course = await Course.findById(courseId);
+
+        if (!course) {
+            return resp.status(404).json({ message: "Course not found!" });
+        }
+
+        if (course.instructor.toString() !== instructor) {
+            return resp.status(403).json({ message: "Unauthorized: You can only update your own courses." });
+        }
+
+        course.title = title || course.title;
+        course.description = description || course.description;
+        course.content = content || course.content;
+
+        await course.save();
+
+        return resp.status(200).json({ message: "Course updated successfully!", course });
+    } catch (error) {
+        console.log("Update course failed : ", error);
+        return resp.status(500).json({ message: "Server error, Update course failed!" });
+    }
+};
+
+export const deleteCourse = async (req, resp) => {
+    try {
+        const instructor = req.user.id;
+        const courseId = req.params.id;
+
+        const course = await Course.findById(courseId);
+
+        if (!course) {
+            return resp.status(404).json({ message: "Course not found!" });
+        }
+
+        if (course.instructor.toString() !== instructor) {
+            return resp.status(403).json({ message: "Unauthorized: You can only delete your own courses." });
+        }
+
+        await Course.findByIdAndDelete(courseId);
+
+        return resp.status(200).json({ message: "Course deleted successfully!" });
+    } catch (error) {
+        console.log("Delete course failed : ", error);
+        return resp.status(500).json({ message: "Server error, Delete course failed!" });
+    }
+};
