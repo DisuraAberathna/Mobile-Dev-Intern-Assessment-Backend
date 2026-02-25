@@ -69,6 +69,21 @@ export const login = async (req, resp) => {
     }
 };
 
+export const getProfile = async (req, resp) => {
+    try {
+        const user = await User.findById(req.user.id).select("-password");
+
+        if (!user) {
+            return resp.status(404).json({ message: "User not found!" });
+        }
+
+        return resp.status(200).json({ message: "User profile retrieved successfully", user });
+    } catch (error) {
+        console.log("Get profile failed : ", error);
+        return resp.status(500).json({ message: "Server error, Get profile failed!" });
+    }
+};
+
 const generateToken = (id, role) => {
     return jwt.sign({ id, role }, secret, { expiresIn: '30d' });
 };
