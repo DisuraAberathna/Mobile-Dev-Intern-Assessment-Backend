@@ -32,7 +32,7 @@ export const getRecommendations = async (req, resp) => {
         const responseText = result.text;
         const recommendedData = JSON.parse(responseText.replace(/```json|```/g, ""),);
 
-        const recommendations = await Course.find({ _id: { $in: recommendedData.ids }, }).populate("instructor", "username");
+        const recommendations = await Course.find({ _id: { $in: recommendedData.ids }, }).populate("instructor", "name");
 
         return resp.status(200).json({ message: "Recommended courses successfully retrieved!", recommendations });
     } catch (error) {

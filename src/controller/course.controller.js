@@ -32,7 +32,7 @@ export const getEnrolledCourses = async (req, resp) => {
 
 export const getCourseById = async (req, resp) => {
     try {
-        const course = await Course.findById(req.params.id).populate("instructor", "username");
+        const course = await Course.findById(req.params.id).populate("instructor", "name");
 
         if (!course) {
             return resp.status(404).json({ message: "Invalid course, can not find course with this id!" });
@@ -70,7 +70,9 @@ export const enrollInCourse = async (req, resp) => {
             $push: { enrolledCourses: course._id }
         });
 
-        return resp.status(200).json({ message: "Student successfully enroll with course!" });
+        const updatedCourse = await Course.findById(req.params.id).populate("instructor", "name");
+
+        return resp.status(200).json({ message: "Student successfully enroll with course!", course: updatedCourse });
     } catch (error) {
         console.log("Student enroll to course failed : ", error);
         return resp.status(500).json({ message: "Server error, Student enroll to course failed!" });
