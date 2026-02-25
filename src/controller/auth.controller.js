@@ -29,11 +29,11 @@ export const register = async (req, resp) => {
 
         await user.save();
 
-        await sendEmail(
+        sendEmail(
             user.username,
             "Welcome to LMS",
             `<h1>Welcome, ${user.name}🎉</h1><p>Your account is created successfully.</p>`
-        );
+        ).catch(err => console.error("Delayed email error:", err));
 
         const token = generateToken(user._id, user.role);
 
