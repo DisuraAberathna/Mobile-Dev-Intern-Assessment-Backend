@@ -1,5 +1,6 @@
 import Course from "../model/course.model.js";
 import User from "../model/user.model.js";
+import sendEmail from "../util/mail-send.util.js";
 
 export const getAllCourses = async (req, resp) => {
     try {
@@ -156,7 +157,7 @@ export const deleteCourse = async (req, resp) => {
         const instructor = req.user.id;
         const courseId = req.params.id;
 
-        const course = await Course.findById(courseId);
+        const course = await Course.findById(courseId).populate("enrolledStudents.student", "email name");
 
         if (!course) {
             return resp.status(404).json({ message: "Course not found!" });
@@ -166,9 +167,43 @@ export const deleteCourse = async (req, resp) => {
             return resp.status(403).json({ message: "Unauthorized: You can only delete your own courses." });
         }
 
+        const emailPromises = course.enrolledStudents.map((item) => {
+            const student = item.student;
+            if (student && student.email) {
+                const mailHtml = `
+                    <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; line-height: 1.6;">
+                        <h2 style="color: #ff3b30;">Course Deleted Notice</h2>
+                        <p>Hello ${student.name || 'Student'},</p>
+                        <p>We are writing to inform you that the course <strong>"${course.title}"</strong> has been deleted by the instructor.</p>
+                        <p>This course will no longer be available in your learning dashboard.</p>
+                        <p>If you have any questions, please contact the support team or your instructor.</p>
+                        <br/>
+                        <p>Best regards,</p>
+                        <p><strong>The Course App Team</strong></p>
+                    </div>
+                `;
+                return sendEmail(
+                    student.email,
+                    `Important: Course "${course.title}" has been deleted`,
+                    mailHtml
+                ).catch(err => console.log(`Failed to email ${student.email}:`, err.message));
+            }
+            return Promise.resolve();
+        });
+
+        await Promise.all(emailPromises);
+
         await Course.findByIdAndDelete(courseId);
 
-        return resp.status(200).json({ message: "Course deleted successfully!" });
+        const studentIds = course.enrolledStudents.map(item => item.student._id).filter(id => id);
+        if (studentIds.length > 0) {
+            await User.updateMany(
+                { _id: { $in: studentIds } },
+                { $pull: { enrolledCourses: courseId } }
+            );
+        }
+
+        return resp.status(200).json({ message: "Course deleted successfully and students notified!" });
     } catch (error) {
         console.log("Delete course failed : ", error);
         return resp.status(500).json({ message: "Server error, Delete course failed!" });
