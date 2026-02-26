@@ -4,6 +4,7 @@ import cors from "cors";
 import morgan from "morgan";
 import helmet from "helmet";
 import connect from "./src/config/database.config.js";
+import apiRoutes from "./src/route/api.route.js";
 
 dotenv.config();
 
@@ -21,6 +22,8 @@ server.use(helmet({
 server.get("/", (req, resp) => {
     resp.send("Server Running, Hello World!");
 });
+
+server.use("/api", apiRoutes);
 
 server.use((err, req, resp, next) => {
     const status = err.status || 500;
