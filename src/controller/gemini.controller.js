@@ -37,8 +37,6 @@ export const getRecommendations = async (req, resp) => {
         return resp.status(200).json({ message: "Recommended courses successfully retrieved!", recommendations });
     } catch (error) {
         console.log("Get recommended courses failed : ", error);
-        return resp
-            .status(500)
-            .json({ message: "Server error, Get recommended courses failed!" });
+        return resp.status(500).json({ message: "Server error, Get recommended courses failed!" });
     }
 };
