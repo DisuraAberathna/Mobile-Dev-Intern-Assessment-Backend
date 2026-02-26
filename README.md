@@ -23,7 +23,7 @@ Node.js + Express backend for the Course App Mobile Dev Intern Assessment.
 npm install
 ```
 
-2. Create a `.env` file in `backend/`:
+2. Create a `.env` file:
 
 ```env
 PORT=5000
